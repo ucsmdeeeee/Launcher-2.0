@@ -1,0 +1,105 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Views/Resources/logoW.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Core\Logger\" />
+    <Folder Include="Views\Components\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CmlLib.Core" Version="3.3.10" />
+    <PackageReference Include="CoreRCON" Version="5.4.2" />
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="MvvmCross" Version="8.0.0" />
+    <PackageReference Include="Npgsql" Version="8.0.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.Encoding" Version="4.3.0" />
+    <PackageReference Include="Telegram.Bot" Version="22.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Views\Resources\axe.png" />
+    <Resource Include="Views\Resources\block.png" />
+    <Resource Include="Views\Resources\cracks.png" />
+    <Resource Include="Views\Resources\art.png" />
+    <None Remove="Views\Resources\portal.png" />
+    <Resource Include="Views\Resources\portal.png" />
+    <None Remove="Views\Resources\portalBut.png" />
+    <Resource Include="Views\Resources\portalBut.png" />
+    <None Remove="Views\Resources\portal.mp3" />
+    <None Remove="Views\Resources\setka2.png" />
+    <Resource Include="Views\Resources\setka2.png" />
+    <None Remove="Views\Resources\setka.png" />
+    <Resource Include="Views\Resources\setka.png" />
+    <None Remove="Views\Resources\chest.png" />
+    <Resource Include="Views\Resources\chest.png" />
+    <None Remove="Views\Resources\table.png" />
+    <Resource Include="Views\Resources\table.png" />
+    <None Update="Views\Resources\libraries\client-1.19-20220607.102129-srg.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Resources\libraries\client-1.19-20220607.102129-extra.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\Resources\libraries\forge-1.19-41.1.0-client.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Remove="Views\Resources\logoIThub.png" />
+    <None Remove="Views\Resources\logoithub_HaG_icon.ico" />
+    <None Remove="Views\Resources\logoW.ico" />
+    <Resource Include="Views\Resources\logoW.ico" />
+    <None Remove="Views\Resources\logo.png" />
+    <Resource Include="Views\Resources\logo.png" />
+    <None Remove="Views\Resources\Items\acacia_log.png" />
+    <Resource Include="Views\Resources\Items\acacia_log.png" />
+    <None Remove="Views\Resources\Items\bamboo_block.png" />
+    <Resource Include="Views\Resources\Items\bamboo.png" />
+    <None Remove="Views\Resources\Items\birch_log.png" />
+    <Resource Include="Views\Resources\Items\birch_log.png" />
+    <None Remove="Views\Resources\Items\bricks.png" />
+    <Resource Include="Views\Resources\Items\bricks.png" />
+    <None Remove="Views\Resources\Items\cherry_log_top.png" />
+    <Resource Include="Views\Resources\Items\cherry_log.png" />
+    <None Remove="Views\Resources\Items\cobblestone.png" />
+    <Resource Include="Views\Resources\Items\cobblestone.png" />
+    <None Remove="Views\Resources\Items\crimson_stem_top.png" />
+    <Resource Include="Views\Resources\Items\crimson_hyphae.png" />
+    <None Remove="Views\Resources\Items\dark_oak_log_top.png" />
+    <Resource Include="Views\Resources\Items\dark_oak_log.png" />
+    <None Remove="Views\Resources\Items\deepslate.png" />
+    <Resource Include="Views\Resources\Items\deepslate.png" />
+    <None Remove="Views\Resources\Items\grass_block_side.png" />
+    <Resource Include="Views\Resources\Items\grass_block.png" />
+    <None Remove="Views\Resources\Items\gravel.png" />
+    <Resource Include="Views\Resources\Items\gravel.png" />
+    <None Remove="Views\Resources\Items\jungle_log.png" />
+    <Resource Include="Views\Resources\Items\jungle_log.png" />
+    <None Remove="Views\Resources\Items\mangrove_log_top.png" />
+    <Resource Include="Views\Resources\Items\mangrove_log.png" />
+    <None Remove="Views\Resources\Items\oak_log_top.png" />
+    <Resource Include="Views\Resources\Items\oak_log.png" />
+    <None Remove="Views\Resources\Items\quartz_block_side.png" />
+    <Resource Include="Views\Resources\Items\quartz.png" />
+    <None Remove="Views\Resources\Items\sand.png" />
+    <Resource Include="Views\Resources\Items\sand.png" />
+    <None Remove="Views\Resources\Items\spruce_log_top.png" />
+    <Resource Include="Views\Resources\Items\spruce_log.png" />
+    <None Remove="Views\Resources\Items\stone.png" />
+    <Resource Include="Views\Resources\Items\stone.png" />
+    <None Remove="Views\Resources\Items\warped_hyphae.png" />
+    <Resource Include="Views\Resources\Items\warped_hyphae.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Views\Resources\portal.mp3" />
+  </ItemGroup>
+
+</Project>

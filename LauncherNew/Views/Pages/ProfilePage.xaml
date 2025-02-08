@@ -1,0 +1,151 @@
+﻿<Page x:Class="LauncherNew.Views.Pages.ProfilePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:viewModels="clr-namespace:LauncherNew.ViewModels"
+      mc:Ignorable="d"
+      d:Background="Transparent" Style="{StaticResource PageStyle}"
+      Title="ProfilePage" Height="720" Width="1280">
+    
+    
+    
+    <Grid  Cursor="None" MouseLeftButtonDown="UpperPanel_MouseLeftButtonDown">
+        <!-- Убираем стандартный курсор -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80" /> <!-- Верхняя строка -->
+            <RowDefinition Height="320"/> <!-- Центральная строка -->
+            <RowDefinition Height="240"/> <!-- Нижняя строка -->
+            <RowDefinition Height="80"/> <!-- Нижняя строка -->
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320"/> <!-- Логотип -->
+            <ColumnDefinition Width="640"/> <!-- Имя -->
+            <ColumnDefinition Width="240"/> <!-- Закрытие -->
+            <ColumnDefinition Width="80"/> <!-- Закрытие -->
+        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource UpperPanel}"></Border>
+        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource UpperPanel}"></Border>
+        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource UpperPanel}"></Border>
+        <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource UpperPanel}"></Border>
+        <!-- Верхняя строка -->
+        <Image Grid.Row="0" Grid.Column="0" Margin="0,0,230,3" Source="pack://application:,,,/Views/Resources/logo.png"
+               Width="80" Height="80" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="ItHub MINECRAFT SERVER" VerticalAlignment="Center" Foreground="Azure" HorizontalAlignment="Center" />
+        <Button Grid.Row="0" Click="LauncherHideButton_Click" Grid.Column="2" Content="-" Foreground="Azure" 
+                Style="{StaticResource MinecraftBlockStylePanel}" 
+                MouseEnter="PlayHoverSound" 
+                MouseLeave="StopHoverSound" 
+                Focusable="False" 
+                HorizontalAlignment="Right"/>
+        <Button Grid.Row="0" Click="LauncherCloseButton_Click" Grid.Column="3" Content="X" Foreground="Azure" 
+                Style="{StaticResource MinecraftBlockStylePanel}" 
+                MouseEnter="PlayHoverSound" 
+                MouseLeave="StopHoverSound" 
+                Focusable="False" />
+        
+        <!-- Центральная строка -->
+        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/> <!-- Friends -->
+                <ColumnDefinition Width="640"/> <!-- Info -->
+                <ColumnDefinition Width="320"/> <!-- Status -->
+            </Grid.ColumnDefinitions>
+            
+            <Border Grid.Column="0" Style="{StaticResource LeftPanel}"></Border>
+            <Border Grid.Column="2" Style="{StaticResource RightPanel}"></Border>
+
+            <!-- Верхняя центральная строка -->
+            
+            <Border Grid.Column="1" Grid.Row="1" Style="{StaticResource LeftPanel}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Ник:" Foreground="Azure" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Nickname}" Foreground="White" />
+                    <TextBlock Text="Полное имя:" Foreground="Azure" FontWeight="Bold" />
+                    <TextBlock Text="{Binding FullName}" Foreground="White" />
+                    <TextBlock Text="Email:" Foreground="Azure" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Email}" Foreground="White" />
+                    <TextBlock Text="Группа:" Foreground="Azure" FontWeight="Bold" />
+                    <TextBlock Text="{Binding GroupName}" Foreground="White" />
+                    <TextBlock Text="Команда:" Foreground="Azure" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Team}" Foreground="White" />
+                    <TextBlock Text="Кафедра:" Foreground="Azure" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Department}" Foreground="White" />
+                </StackPanel>
+            </Border>
+            
+            
+            
+        </Grid>
+
+        <!-- Нижняя строка -->
+        <Grid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource BottomPanel}"></Border>
+            <Border Grid.Column="1" Style="{StaticResource BottomPanel}"></Border>
+            <Border Grid.Column="2" Style="{StaticResource BottomPanel}"></Border>
+            <Border Grid.Column="3" Style="{StaticResource BottomPanel}"></Border>
+            
+            <!-- Кнопки -->
+            <Button Grid.Column="1"  Click="LauncherShowButton_Click" Content="На главную" Foreground="Azure" 
+                    Style="{StaticResource MinecraftBlockStyle}" 
+                    MouseEnter="PlayHoverSound" 
+                    MouseLeave="StopHoverSound" 
+                    Focusable="False" Cursor="None" />
+            
+            <Button Grid.Column="2" Click="SettingsOpenButton_Click" Content="Настройки" Foreground="Azure" 
+                    Style="{StaticResource MinecraftBlockStyle}" 
+                    MouseEnter="PlayHoverSound" 
+                    MouseLeave="StopHoverSound" 
+                    Focusable="False" />
+            
+            
+        </Grid>
+        <!-- Нижняя строка -->
+        <Grid Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="4" VerticalAlignment="Center" HorizontalAlignment="Center" 
+              Visibility="{Binding IsLoadingVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/> <!-- Для текста статуса -->
+                <ColumnDefinition Width="220"/> <!-- Для прогресс-бара -->
+            </Grid.ColumnDefinitions>
+
+            
+
+
+        </Grid>
+
+
+
+
+        <!-- Указатель мыши -->
+        <Image Grid.Row="0" Grid.Column="0" Source="pack://application:,,,/Views/Resources/axe.png" 
+               x:Name="MousePointer"
+               Width="32"
+               Height="32"
+               RenderTransform="{Binding RelativeSource={RelativeSource Self}, Path=RenderTransform}"
+               RenderTransformOrigin="0.5,0.5"
+               VerticalAlignment="Top"
+               HorizontalAlignment="Left"
+               IsHitTestVisible="False"
+               Panel.ZIndex="100" />
+        
+        <MediaElement Grid.Row="0" Grid.Column="0" x:Name="HoverSoundPlayer" 
+                      Source="pack://application:,,,/Views/Resources/hover.mp3" 
+                      LoadedBehavior="Manual" 
+                      UnloadedBehavior="Stop" 
+                      Visibility="Collapsed" />
+
+        
+    </Grid>
+
+        <!-- Центральный контент -->
+        
+
+</Page>

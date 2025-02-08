@@ -1,0 +1,25 @@
+﻿<Window x:Class="LauncherNew.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LauncherNew"
+        xmlns:vm="clr-namespace:LauncherNew.ViewModels"
+        mc:Ignorable="d"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStyle="None"
+        Height="720" Width="1280">
+    
+    <Window.DataContext>
+        <vm:MainViewModel></vm:MainViewModel>
+    </Window.DataContext>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
+
+    <Border Style="{StaticResource WindowBorderStyle}">
+        <Frame Content="{Binding CurrentPage}" NavigationUIVisibility="Hidden" />
+    </Border>
+</Window>

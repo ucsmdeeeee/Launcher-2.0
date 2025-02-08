@@ -1,0 +1,225 @@
+﻿<Page x:Class="LauncherNew.Views.Pages.ShopPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:LauncherNew.Views.Pages"
+      xmlns:vm="clr-namespace:LauncherNew.ViewModels"
+      mc:Ignorable="d"
+      d:Background="Transparent"  Style="{StaticResource PageStyle}"
+      Title="DashboardPage" Height="720" Width="1280">
+    
+    
+    <Page.DataContext>
+        <vm:ShopViewModel></vm:ShopViewModel>
+    </Page.DataContext>
+    
+    <Grid  Cursor="None" MouseLeftButtonDown="UpperPanel_MouseLeftButtonDown">
+        <!-- Убираем стандартный курсор -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80" /> <!-- Верхняя строка -->
+            <RowDefinition Height="320"/> <!-- Центральная строка -->
+            <RowDefinition Height="240"/> <!-- Нижняя строка -->
+            <RowDefinition Height="80"/> <!-- Нижняя строка -->
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320"/> <!-- Логотип -->
+            <ColumnDefinition Width="640"/> <!-- Имя -->
+            <ColumnDefinition Width="240"/> <!-- Закрытие -->
+            <ColumnDefinition Width="80"/> <!-- Закрытие -->
+        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource UpperPanel}"></Border>
+        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource UpperPanel}"></Border>
+        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource UpperPanel}"></Border>
+        <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource UpperPanel}"></Border>
+        <!-- Верхняя строка -->
+        <Image Grid.Row="0" Grid.Column="0" Margin="0,0,230,3" Source="pack://application:,,,/Views/Resources/logo.png"
+               Width="80" Height="80" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="ItHub MINECRAFT SERVER" VerticalAlignment="Center" Foreground="Azure" HorizontalAlignment="Center" />
+        <Button Grid.Row="0" Click="LauncherHideButton_Click" Grid.Column="2" Content="-" Foreground="Azure" 
+                Style="{StaticResource MinecraftBlockStylePanel}" 
+                MouseEnter="PlayHoverSound" 
+                MouseLeave="StopHoverSound" 
+                Focusable="False" 
+                HorizontalAlignment="Right"/>
+        <Button Grid.Row="0" Click="LauncherCloseButton_Click" Grid.Column="3" Content="X" Foreground="Azure" 
+                Style="{StaticResource MinecraftBlockStylePanel}" 
+                MouseEnter="PlayHoverSound" 
+                MouseLeave="StopHoverSound" 
+                Focusable="False" />
+        
+        <!-- Центральная строка -->
+        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/> <!-- Friends -->
+                <ColumnDefinition Width="640"/> <!-- Info -->
+                <ColumnDefinition Width="320"/> <!-- Status -->
+            </Grid.ColumnDefinitions>
+            
+            <Border Grid.Column="0" Style="{StaticResource LeftPanel}"></Border>
+            <Border Grid.Column="2" Style="{StaticResource RightPanel}"></Border>
+
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource BorderSetka}">
+                <ItemsControl ItemsSource="{Binding DisplayedItems}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="4" Columns="8" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border>
+                                <StackPanel Margin="0,10,0,9">
+                                    <Button Background="Transparent" Height="30" Width="30" BorderThickness="0" CommandParameter="{Binding}" 
+                                            Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                        <Button.Content>
+                                            <Image Source="{Binding ImagePath}"  Height="30" Width="30" />
+                                        </Button.Content>
+                                    </Button>
+                                    <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding Price, StringFormat='Цена: {0}'}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+                <!-- Повторите для всех строк и столбцов -->
+            </Grid>
+
+            <Button Grid.Row="1" Grid.Column="0"  Click="FilterCategory" Tag="Инструменты" Content="Инструменты" Foreground="Azure" 
+                    Style="{StaticResource MinecraftChestStyle}" 
+                    Focusable="False" VerticalAlignment="Top" Margin="0,50,0,0"/>
+            <Button Grid.Row="1" Grid.Column="0"  Click="FilterCategory" Tag="Броня" Content="Броня" Foreground="Azure" 
+                    Style="{StaticResource MinecraftChestStyle}" 
+                    Focusable="False" VerticalAlignment="Bottom" />
+            <Grid Grid.Column="1" Grid.Row="0">
+                
+                
+            </Grid>
+            <Button Grid.Row="1" Grid.Column="2"  Click="FilterCategory" Tag="Ресурсы" Content="Ресурсы" Foreground="Azure" 
+                    Style="{StaticResource MinecraftChestStyle}" 
+                    Focusable="False" VerticalAlignment="Top" Margin="80,50,0,0"/>
+            <Button Grid.Row="1" Grid.Column="2"  Click="FilterCategory" Tag="Блоки" Content="Блоки" Foreground="Azure" 
+                    Style="{StaticResource MinecraftChestStyle}" 
+                    Focusable="False" VerticalAlignment="Bottom" Margin="80,0,0,0"/>
+        
+
+        <!-- Нижняя строка -->
+        <Grid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" ></Border>
+            <Border Grid.Column="1" ></Border>
+            <Border Grid.Column="2" ></Border>
+            <Border Grid.Column="3" ></Border>
+            
+            <!-- Кнопки -->
+            <Button Grid.Column="0" Click="FilterCategory" Tag="Оружие" Content="Оружие" Foreground="Azure" 
+                    Style="{StaticResource MinecraftChestStyle}" 
+                    Focusable="False" Cursor="None" />
+            <Button Grid.Column="1" Click="LauncherShowButton_Click" Content="На главную" Foreground="Azure" 
+                    Style="{StaticResource MinecraftBlockStyle}" 
+                    MouseEnter="PlayHoverSound" 
+                    MouseLeave="StopHoverSound" 
+                    Focusable="False" />
+            
+
+            <Button Grid.Column="2" Command="{Binding PurchaseCommand}" Content="Купить" Foreground="Azure" 
+                    Style="{StaticResource MinecraftBlockStyle}" 
+                    MouseEnter="PlayHoverSound" 
+                    MouseLeave="StopHoverSound" 
+                    Focusable="False" />
+            <Button Grid.Column="3" Click="FilterCategory" Tag="Еда" Content="Еда" Foreground="Azure" 
+                    Style="{StaticResource MinecraftChestStyle}" 
+                    Focusable="False" />
+            <Border Grid.Column="1">
+                <Grid HorizontalAlignment="Right">
+                    <!-- Изображение -->
+                    <Image Source="pack://application:,,,/Views/Resources/table.png" Height="50" />
+                    <TextBlock Text="Балланс:" FontSize="16" 
+                               Foreground="White" HorizontalAlignment="Center" Margin="0,100,0,0"></TextBlock>
+                    <!-- Текст поверх изображения -->
+                    <TextBlock Text="{Binding Balance}" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               FontSize="16" 
+                               Foreground="White" 
+                               FontWeight="Bold" Margin="0,15,0,0"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2">
+                <Grid HorizontalAlignment="Left"> 
+                    <!-- Изображение -->
+                    <Image Source="pack://application:,,,/Views/Resources/table.png" Height="50"  />
+                    <TextBlock Text="Счёт:" FontSize="16" 
+                               Foreground="White" HorizontalAlignment="Center" Margin="0,100,0,0"></TextBlock>
+                    <!-- Текст поверх изображения -->
+                    <TextBlock Text="{Binding TotalPrice}" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               FontSize="16" 
+                               Foreground="White" 
+                               FontWeight="Bold" Margin="0,15,0,0"/>
+                </Grid>
+            </Border>
+
+        </Grid>
+        <!-- Нижняя строка -->
+        <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource BorderSetka2}">
+            <ItemsControl ItemsSource="{Binding SelectedItems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" Columns="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border >
+                            <StackPanel Margin="0,10,0,0">
+                                <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" />
+                                <Button Background="Transparent" Height="30" Width="30" BorderThickness="0" Command="{Binding DataContext.RemoveFromCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}">
+                                    <Button.Content>
+                                        <Image Source="{Binding ImagePath}"  Height="30" Width="30" />
+                                    </Button.Content>
+                                </Button>
+                                <TextBlock Text="{Binding Quantity}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+
+
+
+        <!-- Указатель мыши -->
+        <Image Grid.Row="0" Grid.Column="0" Source="pack://application:,,,/Views/Resources/axe.png" 
+               x:Name="MousePointer"
+               Width="32"
+               Height="32"
+               RenderTransform="{Binding RelativeSource={RelativeSource Self}, Path=RenderTransform}"
+               RenderTransformOrigin="0.5,0.5"
+               VerticalAlignment="Top"
+               HorizontalAlignment="Left"
+               IsHitTestVisible="False"
+               Panel.ZIndex="100" />
+        
+        <MediaElement Grid.Row="0" Grid.Column="0" x:Name="HoverSoundPlayer" 
+                      Source="pack://application:,,,/Views/Resources/hover.mp3" 
+                      LoadedBehavior="Manual" 
+                      UnloadedBehavior="Stop" 
+                      Visibility="Collapsed" />
+
+        
+    </Grid>
+</Page>
