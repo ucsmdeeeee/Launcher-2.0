@@ -25,10 +25,8 @@ public class MainViewModel:MvxViewModel
         CurrentPage = new Views.Pages.AuthorizationPage();
     }
 
-    // В MainViewModel или в любом месте, где создается DashboardPage
     public void ShowLauncher()
     {
-        // Передаем оба параметра: telegramId и mainViewModel
         CurrentPage = _dashboardPage;
     }
 

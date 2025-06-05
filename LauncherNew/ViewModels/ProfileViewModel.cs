@@ -89,17 +89,30 @@ namespace LauncherNew.ViewModels
         {
             try
             {
-                // Путь к файлу tgid.txt
-                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"..", "..", "..", "Views", "Resources", "tgid.txt");
+                string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LauncherNew");
+                string filePath = Path.Combine(directoryPath, "tgid.txt");
 
-                // Проверяем, существует ли файл
+                // Проверяем, существует ли папка, если нет — создаем
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                // Если файла нет, создаем пустой файл (или записываем 0)
                 if (!File.Exists(filePath))
                 {
-                    throw new FileNotFoundException($"Файл {filePath} не найден.");
+                    File.WriteAllText(filePath, "0");
+                    return 0;
                 }
 
                 // Читаем содержимое файла
-                string content = File.ReadAllText(filePath);
+                string content = File.ReadAllText(filePath).Trim();
+
+                // Если файл пустой, считаем, что там 0
+                if (string.IsNullOrEmpty(content))
+                {
+                    return 0;
+                }
 
                 // Парсим содержимое в long
                 if (long.TryParse(content, out long telegramId))
@@ -114,9 +127,12 @@ namespace LauncherNew.ViewModels
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Ошибка при чтении Telegram ID: {ex.Message}");
                 return 0; // Возвращаем 0 в случае ошибки
             }
         }
+
+
         public ProfileViewModel()
         {
             try

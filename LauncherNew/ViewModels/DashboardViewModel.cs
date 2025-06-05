@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -112,17 +113,30 @@ public class DashboardViewModel : MvxViewModel, INotifyPropertyChanged
     {
         try
         {
-            // Путь к файлу tgid.txt
-            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"..", "..", "..", "Views", "Resources", "tgid.txt");
+            string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LauncherNew");
+            string filePath = Path.Combine(directoryPath, "tgid.txt");
 
-            // Проверяем, существует ли файл
+            // Проверяем, существует ли папка, если нет — создаем
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            // Если файла нет, создаем пустой файл (или записываем 0)
             if (!File.Exists(filePath))
             {
-                throw new FileNotFoundException($"Файл {filePath} не найден.");
+                File.WriteAllText(filePath, "0");
+                return 0;
             }
 
             // Читаем содержимое файла
-            string content = File.ReadAllText(filePath);
+            string content = File.ReadAllText(filePath).Trim();
+
+            // Если файл пустой, считаем, что там 0
+            if (string.IsNullOrEmpty(content))
+            {
+                return 0;
+            }
 
             // Парсим содержимое в long
             if (long.TryParse(content, out long telegramId))
@@ -137,9 +151,12 @@ public class DashboardViewModel : MvxViewModel, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
+            MessageBox.Show($"Ошибка при чтении Telegram ID: {ex.Message}");
             return 0; // Возвращаем 0 в случае ошибки
         }
     }
+
+
     private void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
     {
         // Получаем список всех файлов в исходной директории
@@ -374,6 +391,56 @@ private ObservableCollection<string> _onlinePlayers;
 
 
 
+    private void ExtractModsFolder(string targetDirectory)
+    {
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            string resourcePrefix = "LauncherNew.Views.Resources.mods."; // Укажите правильный Namespace
+
+            // Создаем целевую папку, если её нет
+            if (!Directory.Exists(targetDirectory))
+            {
+                Directory.CreateDirectory(targetDirectory);
+            }
+
+            // Получаем все файлы, вшитые в ресурсы (из `mods/`)
+            var resourceNames = assembly.GetManifestResourceNames()
+                .Where(r => r.StartsWith(resourcePrefix));
+
+            foreach (var resourceName in resourceNames)
+            {
+                // Получаем относительный путь внутри `mods/`
+                string relativePath = resourceName.Substring(resourcePrefix.Length);
+                string destinationPath = Path.Combine(targetDirectory, relativePath);
+
+                // Если это папка — создаем её
+                string directoryPath = Path.GetDirectoryName(destinationPath);
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                // Если файл уже существует, пропускаем (чтобы не перезаписывать конфиги)
+                if (File.Exists(destinationPath))
+                {
+                    continue;
+                }
+
+                // Копируем ресурс в файл
+                using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
+                using (FileStream fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write))
+                {
+                    resourceStream.CopyTo(fileStream);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка извлечения модов и конфигураций: {ex.Message}");
+        }
+    }
+
 
 
 
@@ -400,10 +467,17 @@ private ObservableCollection<string> _onlinePlayers;
         string customMinecraftPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ItHubMineraft", $"{minecraftVersion}_Fabric");
         Directory.CreateDirectory(customMinecraftPath);
 
+        
+        // Путь к папке с модами внутри лаунчера
+        string modsDestinationPath = Path.Combine(customMinecraftPath, "mods");
+
+        // Извлекаем всю папку `mods` (включая конфигурации и подпапки)
+        ExtractModsFolder(modsDestinationPath);
+
         // Путь к модам
-        string modsSourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Views", "Resources", "mods", "mods");
-        string modsDestinationPath = Path.Combine(customMinecraftPath);
-        CopyMods(modsSourcePath, modsDestinationPath);
+        //string modsSourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Views", "Resources", "mods", "mods");
+        //string modsDestinationPath = Path.Combine(customMinecraftPath);
+        //CopyMods(modsSourcePath, modsDestinationPath);
 
         // Настраиваем путь для Minecraft
         MinecraftPath customPath = new MinecraftPath(customMinecraftPath);

@@ -362,38 +362,54 @@ private async Task LoadUserBalance()
 
 
 // Метод для чтения tg_id из файла
-private long GetTelegramIdFromFile()
-{
-    try
-    {
-        // Путь к файлу tgid.txt
-        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Views", "Resources", "tgid.txt");
-
-        // Проверяем, существует ли файл
-        if (!File.Exists(filePath))
+        private long GetTelegramIdFromFile()
         {
-            throw new FileNotFoundException($"Файл {filePath} не найден.");
+            try
+            {
+                string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LauncherNew");
+                string filePath = Path.Combine(directoryPath, "tgid.txt");
+
+                // Проверяем, существует ли папка, если нет — создаем
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                // Если файла нет, создаем пустой файл (или записываем 0)
+                if (!File.Exists(filePath))
+                {
+                    File.WriteAllText(filePath, "0");
+                    return 0;
+                }
+
+                // Читаем содержимое файла
+                string content = File.ReadAllText(filePath).Trim();
+
+                // Если файл пустой, считаем, что там 0
+                if (string.IsNullOrEmpty(content))
+                {
+                    return 0;
+                }
+
+                // Парсим содержимое в long
+                if (long.TryParse(content, out long telegramId))
+                {
+                    Console.WriteLine($"Прочитан Telegram ID из файла: {telegramId}");
+                    return telegramId;
+                }
+                else
+                {
+                    throw new FormatException("Неверный формат Telegram ID в файле.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при чтении Telegram ID: {ex.Message}");
+                return 0; // Возвращаем 0 в случае ошибки
+            }
         }
 
-        // Читаем содержимое файла
-        string content = File.ReadAllText(filePath);
 
-        // Парсим содержимое в long
-        if (long.TryParse(content, out long telegramId))
-        {
-            Console.WriteLine($"Прочитан Telegram ID из файла: {telegramId}");
-            return telegramId;
-        }
-        else
-        {
-            throw new FormatException("Неверный формат Telegram ID в файле.");
-        }
-    }
-    catch (Exception ex)
-    {
-        return 0; // Возвращаем 0 в случае ошибки
-    }
-}
 
 
 

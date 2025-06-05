@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.Encodings;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -96,7 +97,8 @@ namespace LauncherNew.Views.Pages
                     MessageBox.Show("Пользователь с таким Telegram ID не найден!");
                     return;
                 }
-
+                // Сохраняем Telegram ID в файл
+                SaveTelegramIdToFile(telegramId);
                 // Генерируем код авторизации
                 _authCode = GenerateAuthCode();
 
@@ -167,25 +169,27 @@ namespace LauncherNew.Views.Pages
         {
             try
             {
-                // Путь к файлу tgid.txt
-                string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"..", "..", "..", "Views", "Resources", "tgid.txt");
+                // Используем AppData для хранения файла
+                string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LauncherNew");
+                string filePath = Path.Combine(directoryPath, "tgid.txt");
 
-                // Убедитесь, что папка существует
-                string directoryPath = Path.GetDirectoryName(filePath);
+                // Убедимся, что папка существует
                 if (!Directory.Exists(directoryPath))
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
 
-                // Сохраняем Telegram ID в файл
+                // Записываем Telegram ID в файл
                 File.WriteAllText(filePath, telegramId.ToString());
                 Console.WriteLine($"Telegram ID {telegramId} сохранен в файл {filePath}.");
             }
             catch (Exception ex)
             {
-                
+                MessageBox.Show($"Ошибка при сохранении Telegram ID: {ex.Message}");
             }
         }
+
+
 
 
 
@@ -214,45 +218,71 @@ namespace LauncherNew.Views.Pages
         
         private MediaPlayer _mediaPlayer = new MediaPlayer();
 
-        private void PlayHoverSound(object sender, MouseEventArgs e)
-        {
-            try
-            {
-                string soundPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"..", "..", "..", "Views", "Resources", "hover.mp3");
+private void PlayHoverSound(object sender, MouseEventArgs e)
+{
+    try
+    {
+        string resourceName = "LauncherNew.Views.Resources.hover.mp3"; // Namespace + путь
+        var assembly = Assembly.GetExecutingAssembly();
 
-                if (!System.IO.File.Exists(soundPath))
+        using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+        {
+            if (stream == null)
+            {
+                MessageBox.Show("Ресурс не найден!");
+                return;
+            }
+
+            string tempFile = Path.Combine(Path.GetTempPath(), "hover.mp3");
+
+            // Если файл уже существует, пытаемся удалить его
+            if (File.Exists(tempFile))
+            {
+                try
                 {
-                    MessageBox.Show($"Файл звука не найден: {soundPath}");
+                    File.Delete(tempFile);
+                }
+                catch (IOException)
+                {
+                    MessageBox.Show("Файл используется другим процессом!");
                     return;
                 }
-
-                // Установка пути к файлу и включение повтора
-                _mediaPlayer.Open(new Uri(soundPath, UriKind.Absolute));
-                _mediaPlayer.MediaEnded += (s, ev) =>
-                {
-                    _mediaPlayer.Position = TimeSpan.Zero; // Сброс к началу
-                    _mediaPlayer.Play(); // Повтор воспроизведения
-                };
-
-                _mediaPlayer.Play();
             }
-            catch (Exception ex)
+
+            // Записываем во временный файл
+            using (FileStream fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                MessageBox.Show($"Ошибка воспроизведения звука: {ex.Message}");
+                stream.CopyTo(fs);
             }
+
+            // Загружаем новый файл
+            _mediaPlayer.Open(new Uri(tempFile, UriKind.Absolute));
+            _mediaPlayer.Play();
+
+            
         }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Ошибка воспроизведения звука: {ex.Message}");
+    }
+}
 
-        private void StopHoverSound(object sender, MouseEventArgs e)
-        {
-            try
-            {
-                _mediaPlayer.Stop(); // Остановка воспроизведения
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка остановки звука: {ex.Message}");
-            }
-        }
+
+
+private void StopHoverSound(object sender, MouseEventArgs e)
+{
+    try
+    {
+        _mediaPlayer.Stop();
+        _mediaPlayer.Close(); // Освобождаем файл
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Ошибка остановки звука: {ex.Message}");
+    }
+}
+
 
         
         

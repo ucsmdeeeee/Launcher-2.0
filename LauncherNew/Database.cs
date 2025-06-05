@@ -25,40 +25,7 @@
                     await connection.ExecuteAsync(query, parameters);
                 }
             }
-
-            private long GetTelegramIdFromFile()
-            {
-                try
-                {
-                    // Путь к файлу tgid.txt
-                    string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"..", "..", "..", "Views", "Resources", "tgid.txt");
-
-                    // Проверяем, существует ли файл
-                    if (!File.Exists(filePath))
-                    {
-                        throw new FileNotFoundException($"Файл {filePath} не найден.");
-                    }
-
-                    // Читаем содержимое файла
-                    string content = File.ReadAllText(filePath);
-
-                    // Парсим содержимое в long
-                    if (long.TryParse(content, out long telegramId))
-                    {
-                        Console.WriteLine($"Прочитан Telegram ID из файла: {telegramId}");
-                        return telegramId;
-                    }
-                    else
-                    {
-                        throw new FormatException("Неверный формат Telegram ID в файле.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Ошибка при чтении Telegram ID из файла: {ex.Message}");
-                    return 0; // Возвращаем 0 в случае ошибки
-                }
-            }
+            
             public async Task<bool> PurchaseItemAsync(long telegramId, IEnumerable<Item> items, decimal totalPrice)
     {
         const string getUserBankQuery = @"
