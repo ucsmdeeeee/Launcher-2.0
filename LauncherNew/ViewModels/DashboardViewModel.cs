@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -11,19 +13,19 @@ using MvvmCross.ViewModels;
 using LauncherNew.Models;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
-using CmlLib.Core.Downloader;
-using CmlLib.Core.Installer.FabricMC;
+using CmlLib.Core.Installer.Forge;
 using CmlLib.Core.VersionLoader;
 using LauncherNew.ViewModels;
 using LauncherNew.Views.Pages;
 using System.Timers;
+using CmlLib.Core.ProcessBuilder;
 using Timer = System.Timers.Timer;
 
 namespace LauncherNew.ViewModels;
 
 public class DashboardViewModel : MvxViewModel, INotifyPropertyChanged
 {
-    private readonly CMLauncher _launcher;
+    private readonly MinecraftLauncher _launcher;
     private readonly MinecraftPath _minecraftPath = new MinecraftPath();
     private readonly Database _database;
     private readonly Timer _updateTimer;
@@ -71,7 +73,7 @@ public class DashboardViewModel : MvxViewModel, INotifyPropertyChanged
     public double ProgressBarWidth => (ProgressPercentage / 100.0) * 200.0;
     public DashboardViewModel()
     {
-        _launcher = new CMLauncher(_minecraftPath);
+        _launcher = new MinecraftLauncher (_minecraftPath);
         _database = new Database("Host=93.158.195.13;Port=5432;Username=postgres;Password=1548;Database=students");
         OnlinePlayers = new ObservableCollection<string>();
         Teammates = new ObservableCollection<Teammate>();
@@ -445,109 +447,139 @@ private ObservableCollection<string> _onlinePlayers;
 
 
 
-    
 
 
-    // Метод запуска Minecraft
-   public async Task LaunchMinecraft()
-{
-    try
+
+    public async Task LaunchMinecraft()
     {
-        IsLoadingVisible = true;
-        System.Net.ServicePointManager.DefaultConnectionLimit = 256;
-
-        LoadingStatus = "Инициализация лаунчера...";
-        ProgressPercentage = 10;
-        await Task.Delay(2000);
-        // Версии Minecraft и Fabric
-        string minecraftVersion = "1.20.1"; // Версия Minecraft
-        string fabricLoaderVersion = "0.14.6"; // Версия Fabric Loader
-
-        // Устанавливаем уникальный путь для Minecraft
-        string customMinecraftPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ItHubMineraft", $"{minecraftVersion}_Fabric");
-        Directory.CreateDirectory(customMinecraftPath);
-
-        
-        // Путь к папке с модами внутри лаунчера
-        string modsDestinationPath = Path.Combine(customMinecraftPath, "mods");
-
-        // Извлекаем всю папку `mods` (включая конфигурации и подпапки)
-        ExtractModsFolder(modsDestinationPath);
-
-        // Путь к модам
-        //string modsSourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Views", "Resources", "mods", "mods");
-        //string modsDestinationPath = Path.Combine(customMinecraftPath);
-        //CopyMods(modsSourcePath, modsDestinationPath);
-
-        // Настраиваем путь для Minecraft
-        MinecraftPath customPath = new MinecraftPath(customMinecraftPath);
-        CMLauncher customLauncher = new CMLauncher(customPath);
-
-        LoadingStatus = "Загрузка доступных версий Fabric...";
-        ProgressPercentage = 20;
-        await Task.Delay(2000);
-        // Загружаем доступные версии Fabric
-        var fabricVersionLoader = new FabricVersionLoader();
-        var fabricVersions = await fabricVersionLoader.GetVersionMetadatasAsync();
-
-        // Ищем необходимую версию
-        string fabricVersionName = $"fabric-loader-0.16.10-1.20.1";
-        var fabricVersion = fabricVersions.FirstOrDefault(v => v.Name == fabricVersionName);
-
-        if (fabricVersion == null)
+        try
         {
-            throw new Exception($"Версия Fabric {fabricVersionName} не найдена.");
+            IsLoadingVisible = true;
+            System.Net.ServicePointManager.DefaultConnectionLimit = 256;
+
+            LoadingStatus = "Инициализация лаунчера...";
+            ProgressPercentage = 10;
+            await Task.Delay(2000);
+
+            // Версии Minecraft и Forge
+            string minecraftVersion = "1.20.1";
+            string forgeVersion = "47.4.2"; // Только номер версии Forge
+
+            // Создаем кастомный путь
+            string customMinecraftPath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "ItHubMineraft",
+                $"{minecraftVersion}_Forge"
+            );
+            Directory.CreateDirectory(customMinecraftPath);
+
+            // Инициализация пути и лаунчера
+            var path = new MinecraftPath(customMinecraftPath);
+            var launcher = new MinecraftLauncher(path);
+
+            LoadingStatus = "Установка Forge...";
+            ProgressPercentage = 20;
+
+            // Создаем Forge Installer
+            var forge = new ForgeInstaller(launcher);
+
+            // Устанавливаем Forge
+            string versionName = await forge.Install(minecraftVersion, forgeVersion, new ForgeInstallOptions
+            {
+
+            });
+
+            LoadingStatus = "Копирование модов...";
+            ProgressPercentage = 60;
+
+            // Копируем моды
+            string modsDestinationPath = Path.Combine(customMinecraftPath, "mods");
+            ExtractModsFolder(modsDestinationPath);
+
+            LoadingStatus = "Подготовка к запуску...";
+            ProgressPercentage = 70;
+
+            // Получаем данные пользователя
+            long telegramId = GetTelegramIdFromFile();
+            var user = await _database.GetUserByTelegramIdAsync(telegramId)
+                ?? throw new Exception("Пользователь не найден в базе данных.");
+
+            string nickname = user.Nickname;
+
+            LoadingStatus = "Авторизация на сервере...";
+            ProgressPercentage = 75;
+
+            try
+            {
+                // Фиксированный токен с бесконечным сроком действия
+                string fixedToken = "qwe123asd456zxc7890";
+                string command = $"launcher-auth add {nickname} {fixedToken} 2099-12-31_23:59:59";
+
+                // Используем существующий RCON сервис
+                string response = await _rconService.ExecuteCommandAsync(command);
+                Debug.WriteLine($"RCON ответ: {response}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка отправки RCON команды: {ex.Message}");
+                // Продолжаем выполнение несмотря на ошибку RCON
+            }
+
+            // Настройки запуска
+            var launchOption = new MLaunchOption
+            {
+                MaximumRamMb = MaximumRamMb,
+                Session = MSession.CreateOfflineSession(nickname),
+            };
+
+            LoadingStatus = "Запуск Minecraft Forge...";
+            ProgressPercentage = 80;
+            await Task.Delay(5000);
+
+            // Запуск игры
+            var process = await launcher.InstallAndBuildProcessAsync(versionName, launchOption);
+
+            LoadingStatus = "Запуск, приятной игры!";
+            ProgressPercentage = 100;
+
+            // Запускаем процесс с логированием
+            var processWrapper = new ProcessWrapper(process);
+            processWrapper.OutputReceived += (s, e) => Debug.WriteLine($"Minecraft: {e}");
+            processWrapper.StartWithEvents();
+
+            await Task.Delay(15000);
+            IsLoadingVisible = false;
+        }
+        catch (Exception ex)
+        {
+            LoadingStatus = $"Ошибка: {ex.Message}";
+            ProgressPercentage = 0;
+            IsLoadingVisible = true;
+            Debug.WriteLine($"Ошибка запуска Minecraft: {ex.Message}");
+        }
+    }
+
+    // Вспомогательный метод для копирования директорий
+    private void CopyDirectory(string sourceDir, string destinationDir)
+    {
+        if (!Directory.Exists(sourceDir))
+            return;
+
+        Directory.CreateDirectory(destinationDir);
+
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            var destFile = Path.Combine(destinationDir, Path.GetFileName(file));
+            File.Copy(file, destFile, true);
         }
 
-        // Установка Fabric
-        await fabricVersion.SaveAsync(customPath);
-
-        LoadingStatus = "Подготовка Minecraft...";
-        ProgressPercentage = 40;
-        await Task.Delay(2000);
-        // Получаем данные пользователя
-        long telegramId = GetTelegramIdFromFile();
-        var user = await _database.GetUserByTelegramIdAsync(telegramId);
-        if (user == null)
+        foreach (var dir in Directory.GetDirectories(sourceDir))
         {
-            throw new Exception("Пользователь не найден в базе данных.");
+            var destSubDir = Path.Combine(destinationDir, Path.GetFileName(dir));
+            CopyDirectory(dir, destSubDir);
         }
-
-        string nickname = user.Nickname;
-
-        // Настройки запуска
-        int ramSize = MaximumRamMb;
-
-
-        var launchOption = new MLaunchOption
-        {
-            MaximumRamMb = ramSize, 
-            Session = MSession.GetOfflineSession(nickname),
-        };
-
-        LoadingStatus = "Запуск Minecraft...";
-        ProgressPercentage = 60;
-        await Task.Delay(10000);
-        // Запускаем Minecraft
-        var processInfo = await customLauncher.CreateProcessAsync(fabricVersionName, launchOption);
-
-        LoadingStatus = "Запуск, приятной игры!";
-        ProgressPercentage = 100;
-        
-        processInfo.Start();
-
-        // Убираем прогресс-бар через некоторое время
-        await Task.Delay(15000);
-        IsLoadingVisible = false;
     }
-    catch (Exception ex)
-    {
-        LoadingStatus = $"Ошибка: {ex.Message}";
-        ProgressPercentage = 0;
-        IsLoadingVisible = true; // Показываем прогресс-бар для отображения ошибки
-        Debug.WriteLine($"Ошибка запуска Minecraft: {ex.Message}");
-    }
-}
+
 
 
 
